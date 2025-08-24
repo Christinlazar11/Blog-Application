@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import api from "@/src/lib/axios";
@@ -8,13 +8,26 @@ import DeleteModal from "@/src/components/DeleteModal";
 import BlogSearchFilter from "@/src/components/BlogSearchFilter";
 import { Blog, User } from "@/src/types";
 
-export default function Dashboard() {
+// Loading component for Suspense fallback
+function DashboardLoading() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+// Main dashboard content component
+function DashboardContent() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [user, setUser] = useState<User | null>(null);
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // This is now safely wrapped in Suspense
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     blogId: string;
@@ -109,17 +122,8 @@ export default function Dashboard() {
     });
   };
 
-
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
+    return <DashboardLoading />;
   }
 
   return (
@@ -266,12 +270,12 @@ export default function Dashboard() {
                       >
                         View
                       </Link>
-                                             <button
-                         onClick={() => openDeleteModal(blog._id, blog.title)}
-                         className="text-red-600 hover:text-red-800 transition-colors"
-                       >
-                         Delete
-                       </button>
+                      <button
+                        onClick={() => openDeleteModal(blog._id, blog.title)}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -291,4 +295,13 @@ export default function Dashboard() {
       />
     </div>
   );
-} 
+}
+
+// Main Dashboard component with Suspense wrapper
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent />
+    </Suspense>
+  );
+}
