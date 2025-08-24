@@ -40,11 +40,12 @@ export default function LoginForm() {
       setTimeout(() => {
         // Redirect based on user role
         if (data?.user?.role === "admin") {
+          console.log("in role admin")
           window.location.href = "/admin";
         } else {
           window.location.href = "/dashboard";
         }
-      }, 1000);
+      }, 3000);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setMessage(`❌ ${err.message}`);
