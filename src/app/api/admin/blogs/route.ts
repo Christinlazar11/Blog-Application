@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Blog from "@/src/models/Blog";
+import User from "@/src/models/User"; // Import User model to register the schema
 import { connectDB } from "@/src/lib/db";
 import { verifyJwt } from "@/src/lib/auth";
 
@@ -30,7 +31,7 @@ export async function GET(req: Request) {
   }
 
   await connectDB();
-  const blogs = await Blog.find().populate("author");
+  const blogs = await Blog.find().populate("author", "name email");
   return NextResponse.json({ blogs });
 }
 

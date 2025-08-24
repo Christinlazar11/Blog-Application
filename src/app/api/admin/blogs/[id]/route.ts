@@ -22,25 +22,27 @@ async function validateAdmin(req: Request) {
   return decoded;
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const adminValidation = await validateAdmin(req);
   if (adminValidation instanceof NextResponse) {
     return adminValidation;
   }
 
   await connectDB();
+  const { id } = await params;
   const body = await req.json();
-  const blog = await Blog.findByIdAndUpdate(params.id, body, { new: true });
+  const blog = await Blog.findByIdAndUpdate(id, body, { new: true });
   return NextResponse.json({ blog });
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const adminValidation = await validateAdmin(req);
   if (adminValidation instanceof NextResponse) {
     return adminValidation;
   }
 
   await connectDB();
-  await Blog.findByIdAndDelete(params.id);
+  const { id } = await params;
+  await Blog.findByIdAndDelete(id);
   return NextResponse.json({ message: "Blog deleted" });
 }
