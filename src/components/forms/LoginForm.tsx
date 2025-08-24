@@ -35,7 +35,7 @@ export default function LoginForm() {
 
       // ✅ Store JWT in localStorage (later we can move to HTTP-only cookie for security)
       localStorage.setItem("token", data?.token);
-
+      console.log("data/user",data?.user)
       setMessage("✅ Login successful! Redirecting...");
       setTimeout(() => {
         // Redirect based on user role
@@ -45,7 +45,7 @@ export default function LoginForm() {
         } else {
           window.location.href = "/dashboard";
         }
-      }, 3000);
+      }, 1000);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setMessage(`❌ ${err.message}`);
