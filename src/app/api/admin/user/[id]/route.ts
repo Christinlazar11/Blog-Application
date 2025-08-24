@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import User from "@/src/models/User";
 import { connectDB } from "@/src/lib/db";
 import { verifyJwt } from "@/src/lib/auth";
 
 // Helper to validate admin token
-async function validateAdmin(req: Request) {
+async function validateAdmin(req: NextRequest) {
   const token = req.headers.get("authorization")?.replace("Bearer ", "");
   if (!token) {
     return NextResponse.json({ error: "Authentication required" }, { status: 401 });
@@ -22,25 +22,93 @@ async function validateAdmin(req: Request) {
   return decoded;
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
-  const adminValidation = await validateAdmin(req);
-  if (adminValidation instanceof NextResponse) {
-    return adminValidation;
-  }
+export async function PUT(
+  req: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const adminValidation = await validateAdmin(req);
+    if (adminValidation instanceof NextResponse) {
+      return adminValidation;
+    }
 
-  await connectDB();
-  const body = await req.json();
-  const user = await User.findByIdAndUpdate(params.id, body, { new: true }).select("-password");
-  return NextResponse.json({ user });
+    await connectDB();
+    const { id } = await params; // Await the params
+    const body = await req.json();
+    
+    const user = await User.findByIdAndUpdate(id, body, { 
+      new: true,
+      runValidators: true 
+    }).select("-password");
+    
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    
+    return NextResponse.json({ user });
+  } catch (error: unknown) {
+    console.error("Error updating user:", error);
+    return NextResponse.json(
+      { error: "Failed to update user" },
+      { status: 500 }
+    );
+  }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  const adminValidation = await validateAdmin(req);
-  if (adminValidation instanceof NextResponse) {
-    return adminValidation;
-  }
+export async function DELETE(
+  req: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const adminValidation = await validateAdmin(req);
+    if (adminValidation instanceof NextResponse) {
+      return adminValidation;
+    }
 
-  await connectDB();
-  await User.findByIdAndDelete(params.id);
-  return NextResponse.json({ message: "User deleted" });
+    await connectDB();
+    const { id } = await params; // Await the params
+    
+    const user = await User.findByIdAndDelete(id);
+    
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    
+    return NextResponse.json({ message: "User deleted successfully" });
+  } catch (error: unknown) {
+    console.error("Error deleting user:", error);
+    return NextResponse.json(
+      { error: "Failed to delete user" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(
+  req: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const adminValidation = await validateAdmin(req);
+    if (adminValidation instanceof NextResponse) {
+      return adminValidation;
+    }
+
+    await connectDB();
+    const { id } = await params; // Await the params
+    
+    const user = await User.findById(id).select("-password");
+    
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    
+    return NextResponse.json({ user });
+  } catch (error: unknown) {
+    console.error("Error fetching user:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch user" },
+      { status: 500 }
+    );
+  }
 }
