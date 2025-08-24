@@ -14,27 +14,18 @@ export default function AdminProtected({ children }: AdminProtectedProps) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // useEffect(() => {
-  //   setTimeout(()=>{
-  //   checkAuth();
-  //   },2000)
-  // }, []);
   useEffect(() => {
-    const timer = setTimeout(() => {
-      checkAuth();
-    }, 2000);
-  
-    return () => clearTimeout(timer); // cleanup
+    checkAuth();
   }, []);
   
 
   const checkAuth = async () => {
     try {
       const token = localStorage.getItem("token");
-      // if (!token) {
-      //   router.push("/login");
-      //   return;
-      // }
+      if (!token) {
+        router.push("/login");
+        return;
+      }
 
       const response = await api.get("/profile");
       const userData = response?.data?.user;
@@ -53,7 +44,7 @@ export default function AdminProtected({ children }: AdminProtectedProps) {
       setLoading(false);
     }
   };
-
+console.log("user is",user)
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -62,9 +53,9 @@ export default function AdminProtected({ children }: AdminProtectedProps) {
     );
   }
 
-  if (!user || user.role !== "admin") {
-    return null;
-  }
+  // if (!user || user.role !== "admin") {
+  //   return null;
+  // }
 
   return <>{children}</>;
 }
