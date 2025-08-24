@@ -20,6 +20,7 @@ export default function AdminProtected({ children }: AdminProtectedProps) {
   
 
   const checkAuth = async () => {
+    console.log("in checkout auth")
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -29,7 +30,7 @@ export default function AdminProtected({ children }: AdminProtectedProps) {
 
       const response = await api.get("/profile");
       const userData = response?.data?.user;
-
+      console.log("userData",userData)
       if (!userData || userData.role !== "admin") {
         router.push("/dashboard");
         return;
@@ -53,9 +54,10 @@ console.log("user is",user)
     );
   }
 
-  // if (!user || user.role !== "admin") {
-  //   return null;
-  // }
+  if (!user || user.role !== "admin") {
+    console.log("in return in user.role != admin last")
+    return null;
+  }
 
   return <>{children}</>;
 }
