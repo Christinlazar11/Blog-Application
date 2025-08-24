@@ -2,28 +2,32 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/src/lib/db";
 import Comment from "@/src/models/Comment";
 import Blog from "@/src/models/Blog";
+import User from "@/src/models/User"; // Add this to ensure User model is registered
 import { verifyJwt } from "@/src/lib/auth";
 
 // GET /api/blogs/[id]/comments - Get all comments for a blog
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
     
-    // Check if params.id is a valid ObjectId (24 character hex string)
-    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(params.id);
+    // Await the params since it's now a Promise
+    const { id } = await params;
+    
+    // Check if id is a valid ObjectId (24 character hex string)
+    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
     
     let blog;
     if (isValidObjectId) {
       // Try to find by ID first
-      blog = await Blog.findById(params.id);
+      blog = await Blog.findById(id);
     }
     
     if (!blog) {
       // If not found by ID or not a valid ObjectId, try to find by slug
-      blog = await Blog.findOne({ slug: params.id });
+      blog = await Blog.findOne({ slug: id });
     }
     
     if (!blog) {
@@ -51,10 +55,13 @@ export async function GET(
 // POST /api/blogs/[id]/comments - Add a comment to a blog
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    
+    // Await the params since it's now a Promise
+    const { id } = await params;
     
     const token = request.headers.get("authorization")?.replace("Bearer ", "");
     if (!token) {
@@ -72,18 +79,18 @@ export async function POST(
       );
     }
     
-    // Check if params.id is a valid ObjectId (24 character hex string)
-    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(params.id);
+    // Check if id is a valid ObjectId (24 character hex string)
+    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
     
     let blog;
     if (isValidObjectId) {
       // Try to find by ID first
-      blog = await Blog.findById(params.id);
+      blog = await Blog.findById(id);
     }
     
     if (!blog) {
       // If not found by ID or not a valid ObjectId, try to find by slug
-      blog = await Blog.findOne({ slug: params.id });
+      blog = await Blog.findOne({ slug: id });
     }
     
     if (!blog) {
@@ -122,4 +129,4 @@ export async function POST(
       { status: 500 }
     );
   }
-} 
+}
