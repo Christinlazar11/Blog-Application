@@ -31,10 +31,10 @@ export default function AdminProtected({ children }: AdminProtectedProps) {
   const checkAuth = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        router.push("/login");
-        return;
-      }
+      // if (!token) {
+      //   router.push("/login");
+      //   return;
+      // }
 
       const response = await api.get("/profile");
       const userData = response?.data?.user;
