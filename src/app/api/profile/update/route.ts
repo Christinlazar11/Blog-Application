@@ -11,6 +11,12 @@ interface JwtPayload {
   email?: string;
 }
 
+interface UpdateData {
+  name?: string;
+  email?: string;
+  password?: string;
+}
+
 export async function PUT(req: Request) {
   try {
     const authHeader = req.headers.get("authorization");
@@ -35,7 +41,7 @@ export async function PUT(req: Request) {
     const body = await req.json();
     const { name, email, currentPassword, newPassword } = body;
 
-    const updateData: any = {};
+    const updateData: UpdateData = {};
 
     // Update name (no password required)
     if (name !== undefined && name !== user.name) {
@@ -93,7 +99,7 @@ export async function PUT(req: Request) {
 
     // If no updates, return current user data
     if (Object.keys(updateData).length === 0) {
-      const { password, ...userWithoutPassword } = user.toObject();
+      const { password: _, ...userWithoutPassword } = user.toObject();
       return NextResponse.json({ 
         message: "No changes made",
         user: userWithoutPassword 

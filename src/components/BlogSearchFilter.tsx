@@ -171,7 +171,7 @@ export default function BlogSearchFilter({
           <div className="flex flex-wrap gap-2">
             {search && (
               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
-                Search: "{search}"
+                Search: {search}
                 <button
                   onClick={() => setSearch("")}
                   className="ml-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"

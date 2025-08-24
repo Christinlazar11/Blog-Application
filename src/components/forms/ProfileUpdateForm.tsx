@@ -10,6 +10,13 @@ interface ProfileUpdateFormProps {
   onUpdate?: (updatedUser: User) => void;
 }
 
+interface UpdateData {
+  name?: string;
+  email?: string;
+  currentPassword?: string;
+  newPassword?: string;
+}
+
 export default function ProfileUpdateForm({ user, onUpdate }: ProfileUpdateFormProps) {
   const [form, setForm] = useState({
     name: user.name,
@@ -81,7 +88,7 @@ export default function ProfileUpdateForm({ user, onUpdate }: ProfileUpdateFormP
     setLoading(true);
 
     try {
-      const updateData: any = {};
+      const updateData: UpdateData = {};
       
       if (form.name !== user.name) {
         updateData.name = form.name;
