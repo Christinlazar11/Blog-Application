@@ -6,23 +6,26 @@ import { verifyJwt } from "@/src/lib/auth";
 // GET /api/blogs/[id] - Get a specific blog
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
     
-    // Check if params.id is a valid ObjectId (24 character hex string)
-    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(params.id);
+    // Await the params Promise
+    const { id } = await params;
+    
+    // Check if id is a valid ObjectId (24 character hex string)
+    const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
     
     let blog;
     if (isValidObjectId) {
       // Try to find by ID first
-      blog = await Blog.findById(params.id).populate("author", "name email");
+      blog = await Blog.findById(id).populate("author", "name email");
     }
     
     if (!blog) {
       // If not found by ID or not a valid ObjectId, try to find by slug
-      blog = await Blog.findOne({ slug: params.id }).populate("author", "name email");
+      blog = await Blog.findOne({ slug: id }).populate("author", "name email");
     }
     
     if (!blog) {
@@ -45,10 +48,13 @@ export async function GET(
 // PUT /api/blogs/[id] - Update a blog
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    
+    // Await the params Promise
+    const { id } = await params;
     
     const token = request.headers.get("authorization")?.replace("Bearer ", "");
     if (!token) {
@@ -66,7 +72,7 @@ export async function PUT(
       );
     }
     
-    const blog = await Blog.findById(params.id);
+    const blog = await Blog.findById(id);
     if (!blog) {
       return NextResponse.json(
         { error: "Blog not found" },
@@ -92,7 +98,7 @@ export async function PUT(
     if (tags !== undefined) updateData.tags = tags;
     
     const updatedBlog = await Blog.findByIdAndUpdate(
-      params.id,
+      id,
       updateData,
       { new: true, runValidators: true }
     ).populate("author", "name email");
@@ -110,10 +116,13 @@ export async function PUT(
 // DELETE /api/blogs/[id] - Delete a blog
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
+    
+    // Await the params Promise
+    const { id } = await params;
     
     const token = request.headers.get("authorization")?.replace("Bearer ", "");
     if (!token) {
@@ -131,7 +140,7 @@ export async function DELETE(
       );
     }
     
-    const blog = await Blog.findById(params.id);
+    const blog = await Blog.findById(id);
     if (!blog) {
       return NextResponse.json(
         { error: "Blog not found" },
@@ -147,7 +156,7 @@ export async function DELETE(
       );
     }
     
-    await Blog.findByIdAndDelete(params.id);
+    await Blog.findByIdAndDelete(id);
     
     return NextResponse.json({ message: "Blog deleted successfully" });
   } catch (error: unknown) {
@@ -157,4 +166,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}
