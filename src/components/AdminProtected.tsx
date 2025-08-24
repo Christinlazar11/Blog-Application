@@ -14,9 +14,19 @@ export default function AdminProtected({ children }: AdminProtectedProps) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // useEffect(() => {
+  //   setTimeout(()=>{
+  //   checkAuth();
+  //   },2000)
+  // }, []);
   useEffect(() => {
-    checkAuth();
+    const timer = setTimeout(() => {
+      checkAuth();
+    }, 2000);
+  
+    return () => clearTimeout(timer); // cleanup
   }, []);
+  
 
   const checkAuth = async () => {
     try {
@@ -52,9 +62,9 @@ export default function AdminProtected({ children }: AdminProtectedProps) {
     );
   }
 
-  // if (!user || user.role !== "admin") {
-  //   return null;
-  // }
+  if (!user || user.role !== "admin") {
+    return null;
+  }
 
   return <>{children}</>;
 }
