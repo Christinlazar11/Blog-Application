@@ -9,7 +9,7 @@ export default function LoginForm() {
   const [form, setForm] = useState<LoginForm>({ email: "", password: "" });
   const [message, setMessage] = useState<string>("");
   const [errors, setErrors] = useState<ValidationError[]>([]);
-
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     // Clear error for this field when user starts typing
@@ -35,17 +35,15 @@ export default function LoginForm() {
 
       // ✅ Store JWT in localStorage (later we can move to HTTP-only cookie for security)
       localStorage.setItem("token", data?.token);
-      console.log("data/user",data?.user)
       setMessage("✅ Login successful! Redirecting...");
-      setTimeout(() => {
+      // setTimeout(() => {
         // Redirect based on user role
         if (data?.user?.role === "admin") {
-          console.log("in role admin")
           window.location.href = "/admin";
         } else {
           window.location.href = "/dashboard";
         }
-      }, 1000);
+      // }, 1000);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setMessage(`❌ ${err.message}`);

@@ -16,7 +16,6 @@ export default function DebugPage() {
   const fetchBlogs = async () => {
     try {
       const response = await api.get("/blogs");
-      console.log("Debug: All blogs response:", response.data);
       setBlogs(response.data.blogs || []);
     } catch (err: unknown) {
       console.error("Debug: Error fetching blogs:", err);
@@ -32,9 +31,7 @@ export default function DebugPage() {
 
   const testBlogView = async (blogId: string, slug?: string) => {
     try {
-      console.log("Testing blog view with ID:", blogId, "and slug:", slug);
       const response = await api.get(`/blogs/${slug || blogId}`);
-      console.log("Blog view response:", response.data);
       alert("Blog view successful! Check console for details.");
     } catch (err: unknown) {
       console.error("Blog view error:", err);
