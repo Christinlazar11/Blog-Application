@@ -1,18 +1,44 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import api from "@/src/lib/axios";
 import { Blog } from "@/src/types";
 import BlogSearchFilter from "@/src/components/BlogSearchFilter";
 
-export default function Feed() {
+// Loading component for Suspense fallback
+function FeedLoading() {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Feed Header */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-6">
+            <h1 className="text-3xl font-bold text-gray-900">Blog Feed</h1>
+            <p className="text-gray-600 mt-2">Discover amazing content from our community</p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Loading content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// Main feed content component
+function FeedContent() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // This is now safely wrapped in Suspense
 
   useEffect(() => {
     fetchAllBlogs();
@@ -152,4 +178,13 @@ export default function Feed() {
       </main>
     </div>
   );
-} 
+}
+
+// Main Feed component with Suspense wrapper
+export default function Feed() {
+  return (
+    <Suspense fallback={<FeedLoading />}>
+      <FeedContent />
+    </Suspense>
+  );
+}

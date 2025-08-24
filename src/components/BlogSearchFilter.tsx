@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface BlogSearchFilterProps {
@@ -10,14 +10,45 @@ interface BlogSearchFilterProps {
   className?: string;
 }
 
-export default function BlogSearchFilter({ 
+// Loading component for the filter
+function FilterLoading({ className = "" }: { className?: string }) {
+  return (
+    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 ${className}`}>
+      <div className="animate-pulse">
+        {/* Search bar skeleton */}
+        <div className="mb-4">
+          <div className="h-10 bg-gray-200 dark:bg-gray-600 rounded-md"></div>
+        </div>
+        
+        {/* Filters skeleton */}
+        <div className="flex flex-wrap gap-3 mb-4">
+          <div className="h-10 w-24 bg-gray-200 dark:bg-gray-600 rounded-md"></div>
+          <div className="h-10 w-24 bg-gray-200 dark:bg-gray-600 rounded-md"></div>
+        </div>
+        
+        {/* Tags skeleton */}
+        <div className="mb-4">
+          <div className="h-4 w-24 bg-gray-200 dark:bg-gray-600 rounded mb-2"></div>
+          <div className="flex flex-wrap gap-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-6 w-16 bg-gray-200 dark:bg-gray-600 rounded-full"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main filter component
+function BlogSearchFilterContent({ 
   availableTags = [], 
   showStatusFilter = true, 
   showAuthorFilter = false,
   className = "" 
 }: BlogSearchFilterProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // This is now safely wrapped in Suspense
   
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [status, setStatus] = useState(searchParams.get("status") || "");
@@ -223,5 +254,14 @@ export default function BlogSearchFilter({
         </div>
       )}
     </div>
+  );
+}
+
+// Main exported component with Suspense wrapper
+export default function BlogSearchFilter(props: BlogSearchFilterProps) {
+  return (
+    <Suspense fallback={<FilterLoading className={props.className} />}>
+      <BlogSearchFilterContent {...props} />
+    </Suspense>
   );
 }
